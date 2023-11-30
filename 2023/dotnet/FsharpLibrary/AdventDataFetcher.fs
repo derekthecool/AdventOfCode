@@ -9,6 +9,7 @@ module AdventDataFetcher =
     open System.Diagnostics
     open System.Runtime.CompilerServices
     open System.Runtime.InteropServices
+    open System.Text.RegularExpressions
 
     (*
     1. Get year from filename, repo name is AdventOfCode and then this code will be in the 2023 directory
@@ -18,63 +19,74 @@ module AdventDataFetcher =
             if it does not exist then download it and store in similar path
             if it does exist then read the file and be done
     *)
-    let doTrace ([<CallerMemberName>] memberName: string, [<CallerFilePath>] path: string) =
-        printfn "in do trace"
-        printfn " member: %A, path: %A" memberName path
-        memberName, path
-    // sprintf "memberName: %A, path: %A" memberName path
-    type Tracer() =
-        member _.DoTrace
+
+
+    /// <summary>
+    /// This is a fancy function to get the name and path of the calling
+    /// function.
+    /// Example output:
+    /// ("Day1", "D:\Programming\AdventOfCode\2023\dotnet\FsharpLibrary\Days.fs")
+    ///
+    /// Use like this: let tracer = (Tracer()).DoTrace()
+    /// </summary>
+    type getFunctionInfo() =
+        member _.get
             (
                 [<CallerMemberName; Optional; DefaultParameterValue("")>] memberName: string,
-                [<CallerFilePath; Optional; DefaultParameterValue("")>] path: string,
-                [<CallerLineNumber; Optional; DefaultParameterValue(0)>] line: int
+                [<CallerFilePath; Optional; DefaultParameterValue("")>] path: string
             ) =
-            // Console.WriteLine(sprintf $"Message: {message}")
-            // Console.WriteLine(sprintf $"Member name: {memberName}")
-            // Console.WriteLine(sprintf $"Source file path: {path}")
-            // Console.WriteLine(sprintf $"Source line number: {line}")
-            printfn "Test output: %A" memberName
             memberName, path
 
-    let getCallingFunctionPath callingFunctionName =
-        printfn "callingFunctionName: %s" callingFunctionName
-        let stackFrames = new StackTrace() |> fun stackTrace -> stackTrace.GetFrames()
+    // // This version uses a callstack approach and it does not always work
+    // let getCallingFunctionPath callingFunctionName =
+    //     printfn "callingFunctionName: %s" callingFunctionName
+    //     let stackFrames = new StackTrace() |> fun stackTrace -> stackTrace.GetFrames()
+    //
+    //     match stackFrames with
+    //     | null
+    //     | [||] -> None
+    //     | _ ->
+    //         let callingFrame =
+    //             stackFrames
+    //             |> Seq.skipWhile (fun frame -> frame.GetMethod().Name = "getCallingFunctionPath")
+    //             |> Seq.tryHead
+    //         // 0 is the current frame (aka this function)
+    //         // 1 is something ....
+    //         // 2 is the calling function from some other place (aka consumer of this library)
+    //         // This one is needed to get the method name when is expected to include [Dd]ay1 etc.
+    //         stackFrames
+    //         |> Seq.iter (fun word -> printfn "stack frame: %A" (word.GetMethod()))
+    //
+    //         match callingFrame with
+    //         | Some frame ->
+    //             let method = frame.GetMethod()
+    //             Some(method.DeclaringType.Assembly.Location, method.Name)
+    //         | None -> None
 
-        match stackFrames with
-        | null
-        | [||] -> None
-        | _ ->
-            let callingFrame =
-                stackFrames
-                |> Seq.skipWhile (fun frame -> frame.GetMethod().Name = "getCallingFunctionPath")
-                |> Seq.tryHead
-            // 0 is the current frame (aka this function)
-            // 1 is something ....
-            // 2 is the calling function from some other place (aka consumer of this library)
-            // This one is needed to get the method name when is expected to include [Dd]ay1 etc.
-            // let callingFrame = stackFrames.[2]
-            stackFrames
-            |> Seq.iter (fun word -> printfn "stack frame: %A" (word.GetMethod()))
+    let calculateDownloadPath functionInformation =
+        let dayCapture = Regex.Match((fst functionInformation), @"[Dd]ay(\d{1,2})")
 
-            // let method = callingFrame.GetMethod()
+        let dayNumber =
+            match dayCapture.Success with
+            | true -> dayCapture.Groups[1].Value |> int
+            | false -> 0
 
-            match callingFrame with
-            | Some frame ->
-                let method = frame.GetMethod()
-                Some(method.DeclaringType.Assembly.Location, method.Name)
-            | None -> None
+        if dayNumber = 0 then
+            raise (System.Exception($"Capturing the day number from the string: {(fst functionInformation)} failed"))
 
-    // Some(method.DeclaringType.Assembly.Location, method.Name)
+        let yearCapture = Regex.Match((snd functionInformation), @"AdventOfCode[/\\](\d{4})")
 
-    let getAdventYearFromCallingFunction =
-        printfn "test"
-        let stackTrace = new StackTrace()
-        let stackFrame = stackTrace.GetFrame(2).GetMethod().Name
-        let path = getCallingFunctionPath
-        printfn "answer: %d, %A, %A" 5 stackFrame path
+        let yearNumber =
+            match yearCapture.Success with
+            | true -> yearCapture.Groups[1].Value |> int
+            | false -> 0
 
+        if yearNumber = 0 then
+            raise (System.Exception($"Capturing the year number from the string: {(snd functionInformation)} failed"))
 
+        let downloadPath = sprintf "https://adventofcode.com/%d/day/%d/input" yearNumber dayNumber
+
+        printfn "dayNumber: %A, yearNumber: %A, downloadPath: %A" dayNumber yearNumber downloadPath
 
     let downloadAdventOfCodeInput (url: string) (outputPath: string) =
         async {
