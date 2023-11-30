@@ -6,11 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="../../../.adventOfCodeCookie.txt" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Day1.fs" />
+    <Compile Include="AdventDataFetcher.fs" />
+    <Compile Include="Days.fs" />
   </ItemGroup>
 
 </Project>
