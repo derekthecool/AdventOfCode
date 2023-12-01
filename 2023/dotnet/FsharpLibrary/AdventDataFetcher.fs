@@ -74,7 +74,8 @@ module AdventDataFetcher =
         if dayNumber = 0 then
             raise (System.Exception($"Capturing the day number from the string: {(fst functionInformation)} failed"))
 
-        let yearCapture = Regex.Match((snd functionInformation), @"AdventOfCode[/\\](\d{4})")
+        let yearCapture =
+            Regex.Match((snd functionInformation), @"AdventOfCode[/\\](\d{4})")
 
         let yearNumber =
             match yearCapture.Success with
@@ -84,9 +85,29 @@ module AdventDataFetcher =
         if yearNumber = 0 then
             raise (System.Exception($"Capturing the year number from the string: {(snd functionInformation)} failed"))
 
-        let downloadPath = sprintf "https://adventofcode.com/%d/day/%d/input" yearNumber dayNumber
+        let downloadPath =
+            sprintf "https://adventofcode.com/%d/day/%d/input" yearNumber dayNumber
 
-        printfn "dayNumber: %A, yearNumber: %A, downloadPath: %A" dayNumber yearNumber downloadPath
+        let downloadPathCheck = Uri.IsWellFormedUriString(downloadPath, UriKind.Absolute)
+
+        if not downloadPathCheck then
+            raise (System.Exception($"The download path {downloadPath} could not be parsed as I URI correctly"))
+
+        printfn
+            "dayNumber: %A, yearNumber: %A, downloadPath: %A, downloadPathCheck: %A"
+            dayNumber
+            yearNumber
+            downloadPath
+            downloadPathCheck
+
+        functionInformation, downloadPath
+
+    // // https://adventofcode.com/2023/day/1/input" converts to [repo root] -> AdventOfCode/inputs/2023/1.txt
+    // let convertDownloadPathToLocalFilePath downloadPath =
+    //     let localFilePath =
+
+    // let downloadOrReadFile downloadPath =
+    //     let localFilePath = convertDownloadPathToLocalFilePath downloadPath
 
     let downloadAdventOfCodeInput (url: string) (outputPath: string) =
         async {
@@ -132,3 +153,8 @@ module AdventDataFetcher =
                 // Dispose of the HttpClient to release resources
                 httpClient.Dispose()
         }
+
+    let getInputData (functionInformation: string * string) =
+        let pathInformation = calculateDownloadPath functionInformation
+        let fileData = File.ReadLines("test")
+        fileData
