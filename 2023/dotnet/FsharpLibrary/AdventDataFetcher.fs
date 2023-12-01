@@ -63,24 +63,28 @@ module AdventDataFetcher =
     //             Some(method.DeclaringType.Assembly.Location, method.Name)
     //         | None -> None
 
-    let calculateDownloadPath functionInformation =
-        let dayCapture = Regex.Match((fst functionInformation), @"[Dd]ay(\d{1,2})")
+    let getDayNumber dayString =
+        let dayCapture = Regex.Match(dayString, @"[Dd]ay(\d{1,2})")
 
-        let dayNumber =
-            match dayCapture.Success with
-            | true -> dayCapture.Groups[1].Value |> int
-            | false -> 0
+        match dayCapture.Success with
+        | true -> dayCapture.Groups[1].Value |> int
+        | false -> 0
+
+    let getYearNumber yearString =
+        let yearCapture = Regex.Match(yearString, @"AdventOfCode[/\\](\d{4})")
+
+        match yearCapture.Success with
+        | true -> yearCapture.Groups[1].Value |> int
+        | false -> 0
+
+    let calculateDownloadPath functionInformation =
+
+        let dayNumber = getDayNumber (fst functionInformation)
 
         if dayNumber = 0 then
             raise (System.Exception($"Capturing the day number from the string: {(fst functionInformation)} failed"))
 
-        let yearCapture =
-            Regex.Match((snd functionInformation), @"AdventOfCode[/\\](\d{4})")
-
-        let yearNumber =
-            match yearCapture.Success with
-            | true -> yearCapture.Groups[1].Value |> int
-            | false -> 0
+        let yearNumber = getYearNumber (snd functionInformation)
 
         if yearNumber = 0 then
             raise (System.Exception($"Capturing the year number from the string: {(snd functionInformation)} failed"))
@@ -100,21 +104,16 @@ module AdventDataFetcher =
             downloadPath
             downloadPathCheck
 
-        functionInformation, downloadPath
+        downloadPath, dayNumber, yearNumber
 
-    // // https://adventofcode.com/2023/day/1/input" converts to [repo root] -> AdventOfCode/inputs/2023/1.txt
-    // let convertDownloadPathToLocalFilePath downloadPath =
-    //     let localFilePath =
-
-    // let downloadOrReadFile downloadPath =
-    //     let localFilePath = convertDownloadPathToLocalFilePath downloadPath
+    let calculateLocalPath libraryPathBase year day =
+        // https://adventofcode.com/2023/day/1/input" converts to [repo root] -> AdventOfCode/inputs/2023/1.txt
+        let filename = $"{day}.txt"
+        let fullFilename = Path.Join([ "inputs"; $"{year}"; filename ] |> List.toArray)
+        Regex.Replace(libraryPathBase, @"(?<=AdventOfCode[/\\]).*", fullFilename)
 
     let downloadAdventOfCodeInput (url: string) (outputPath: string) =
         async {
-            // Create an HttpClient with a handler that uses the provided CookieContainer
-            let handler = new HttpClientHandler()
-            let cookieContainer = new CookieContainer()
-
             let cookieFromEnvironmentVariable =
                 Environment.GetEnvironmentVariable("AdventOfCodeCookie")
 
@@ -123,10 +122,10 @@ module AdventDataFetcher =
 
             printfn "environment variable: %s" cookieFromEnvironmentVariable
 
-            cookieContainer.Add(
-                new Uri("https://adventofcode.com/2022/day/1/input"),
-                new Cookie("session", cookieFromEnvironmentVariable)
-            )
+            // Create an HttpClient with a handler that uses the provided CookieContainer
+            let handler = new HttpClientHandler()
+            let cookieContainer = new CookieContainer()
+            cookieContainer.Add(new Uri(url), new Cookie("session", cookieFromEnvironmentVariable))
 
             handler.CookieContainer <- cookieContainer
             let httpClient = new HttpClient(handler)
@@ -155,6 +154,33 @@ module AdventDataFetcher =
         }
 
     let getInputData (functionInformation: string * string) =
-        let pathInformation = calculateDownloadPath functionInformation
-        let fileData = File.ReadLines("test")
-        fileData
+        let (downloadPath, day, year) = calculateDownloadPath functionInformation
+        let (functionName, callingFunctionPath) = functionInformation
+
+        let localFile = calculateLocalPath callingFunctionPath year day
+        let fileExists = File.Exists(localFile)
+        let directory = Path.GetDirectoryName(localFile).ToString()
+        let directoryExists = Directory.Exists(directory)
+
+        if not directoryExists then
+            printfn "Creating new directory: %A" directory
+            Directory.CreateDirectory(directory) |> ignore
+
+        printfn
+            "downloadPath: %A, localFile: %A, fileExists: %A, directoryExists: %A"
+            downloadPath
+            localFile
+            fileExists
+            directoryExists
+
+        if fileExists then
+            File.ReadLines(localFile)
+        else
+            printfn "Download file: %A to %A" downloadPath localFile
+            downloadAdventOfCodeInput downloadPath localFile |> Async.RunSynchronously
+
+            try
+                File.ReadLines(localFile)
+            with ex ->
+                printfn "Caught an unexpected exception: %s" ex.Message
+                raise ex // Rethrow the exception if it's not a DivideByZeroException
