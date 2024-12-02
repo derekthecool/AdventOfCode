@@ -1,7 +1,7 @@
 local M = {}
 
 M.from = function(year, day)
-    local file = string.format('%s/AdventOfCode/inputs/%d/%d.txt', os.getenv('HOME'), year, day)
+    local file = string.format('%s/AdventOfCode/inputs/%d/%d.txt', HOME, year, day)
     io.input(file)
 
     local output = {}
