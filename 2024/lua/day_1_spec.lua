@@ -45,4 +45,30 @@ describe("2024 day 1", function()
 		assert.are.same({ 1, 2, 3, 3, 3, 4 }, t1)
 		assert.are.same({ 3, 3, 3, 4, 5, 9 }, t2)
 	end)
+
+	it("Caluculate the distance array for simple example", function()
+		local text = { "3   4", "4   3", "2   5", "1   3", "3   9", "3   3" }
+		local t1, t2 = require("day_1").parse(text)
+		local distance_array = require("day_1").distance(t1, t2)
+
+		assert.are.same({ 2, 1, 0, 1, 2, 5 }, distance_array)
+	end)
+
+    it('Calculate the total distance for simple example', function()
+		local text = { "3   4", "4   3", "2   5", "1   3", "3   9", "3   3" }
+		local t1, t2 = require("day_1").parse(text)
+		local distance_array = require("day_1").distance(t1, t2)
+        local total_distance = require("day_1").total_distance(distance_array)
+
+		assert.are.same(11, total_distance)
+    end)
+
+    it('Day 1 part 1 solution', function()
+		local day_1 = require("inputs").from(2024, 1)
+		local t1, t2 = require("day_1").parse(day_1)
+		local distance_array = require("day_1").distance(t1, t2)
+        local total_distance = require("day_1").total_distance(distance_array)
+
+		assert.are.same(3574690, total_distance)
+    end)
 end)
