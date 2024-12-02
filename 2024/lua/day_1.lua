@@ -35,4 +35,29 @@ M.total_distance = function(distance_array)
     return sum
 end
 
+M.similarity = function(first, second)
+    local similarity_table = {}
+
+    -- Transform the second table to a dictionary for value counts
+    local second_as_dictionary = {}
+    for _, value in pairs(second) do
+        second_as_dictionary[value] = (second_as_dictionary[value] or 0) + 1
+    end
+
+    for _, value in pairs(first) do
+        local similar_value = second_as_dictionary[value]
+        if not similar_value then
+            similar_value = 0
+        end
+        table.insert(similarity_table, similar_value * value)
+    end
+    return similarity_table
+end
+
+M.part_2 = function(input)
+    local t1, t2 = M.parse(input)
+    local similarity_array = M.similarity(t1, t2)
+    return M.total_distance(similarity_array)
+end
+
 return M

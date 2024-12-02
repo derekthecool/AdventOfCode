@@ -54,21 +54,44 @@ describe("2024 day 1", function()
 		assert.are.same({ 2, 1, 0, 1, 2, 5 }, distance_array)
 	end)
 
-    it('Calculate the total distance for simple example', function()
+	it("Calculate the total distance for simple example", function()
 		local text = { "3   4", "4   3", "2   5", "1   3", "3   9", "3   3" }
 		local t1, t2 = require("day_1").parse(text)
 		local distance_array = require("day_1").distance(t1, t2)
-        local total_distance = require("day_1").total_distance(distance_array)
+		local total_distance = require("day_1").total_distance(distance_array)
 
 		assert.are.same(11, total_distance)
-    end)
+	end)
 
-    it('Day 1 part 1 solution', function()
+	it("Day 1 part 1 solution", function()
 		local day_1 = require("inputs").from(2024, 1)
 		local t1, t2 = require("day_1").parse(day_1)
 		local distance_array = require("day_1").distance(t1, t2)
-        local total_distance = require("day_1").total_distance(distance_array)
+		local total_distance = require("day_1").total_distance(distance_array)
 
 		assert.are.same(3574690, total_distance)
-    end)
+	end)
+end)
+
+describe("Day 1 part 2", function()
+	it("Example similarity score", function()
+		local text = { "3   4", "4   3", "2   5", "1   3", "3   9", "3   3" }
+		local t1, t2 = require("day_1").parse(text)
+		local similarity_array = require("day_1").similarity(t1, t2)
+		assert.are.same({ 0, 0, 9, 9, 9, 4 }, similarity_array)
+		-- local total_distance = require("day_1").total_distance(distance_array)
+	end)
+
+	it("Example total similarity score", function()
+		local text = { "3   4", "4   3", "2   5", "1   3", "3   9", "3   3" }
+		local t1, t2 = require("day_1").parse(text)
+		local similarity_array = require("day_1").similarity(t1, t2)
+		local total_similarity = require("day_1").total_distance(similarity_array)
+		assert.are.same(31, total_similarity)
+	end)
+
+	it("Part 2 solution", function()
+		local total_similarity = require("day_1").part_2(require("inputs").from(2024, 1))
+		assert.are.same(22565391, total_similarity)
+	end)
 end)
