@@ -1,34 +1,90 @@
 HOME = (os.getenv("HOME") or os.getenv("USERPROFILE"))
 package.path = string.format("%s;%s/AdventOfCode/2024/lua/?.lua", package.path, HOME)
 
--- Import all functions from luafun to the global table
-for k, v in pairs(require "fun") do _G[k] = v end
+require("luafun_global")
+
+print(range(32)
+	:filter(function(a)
+		return a % 2 == 0
+	end)
+	:map(function(i)
+		return i * i
+	end)
+	:totable())
 
 local days = require("inputs")
 print(days)
 
-
 print(all(function(x)
-    return x > 5
+	return x > 5
 end, range(6, 20)))
 
-local day2_code = require('day_2')
+local day2_code = require("day_2")
 
 -- 502 was too high
+-- 473 was too high
 -- 296 was too low
 --
 
 local day2 = days.from(2024, 2, true)
 print(day2)
 
-local safe_values = {}
-for key, value in ipairs(day2) do
-    print(key, value)
-    local numbers = {}
-    for i=1, #value do
-        table.insert(numbers, value[i] - value[i+1])
-    end
+local function safe_check_process(data)
+	local safe = {}
+	for key, value in ipairs(data) do
+		print(key, value)
+		local numbers = {}
+		for i = 1, #value - 1 do
+			table.insert(numbers, value[i] - value[i + 1])
+		end
+		local range_check = all(function(a)
+			return math.abs(a) >= 1 and math.abs(a) <= 3
+		end, numbers)
+		local same_sign_check = all(function(a)
+			return a < 0
+		end, numbers) or all(function(a)
+			return a > 0
+		end, numbers)
+		local full_safe = range_check and same_sign_check
+
+		-- print(range_check)
+		-- print(same_sign_check)
+		-- print(full_safe)
+
+		local item = {
+			data = value,
+			difference = numbers,
+			range_okay = range_check,
+			same_sign = same_sign_check,
+			full_safe = full_safe,
+		}
+		print(item)
+		table.insert(safe, item)
+	end
+	return safe
 end
+
+local example = {
+	{ 7, 6, 4, 2, 1 },
+	{ 1, 2, 7, 8, 9 },
+	{ 9, 7, 6, 2, 1 },
+	{ 1, 3, 2, 4, 5 },
+	{ 8, 6, 4, 4, 1 },
+	{ 1, 3, 6, 7, 9 },
+}
+
+-- -- local asdf = safe_check_process(day_2)
+-- local example_check = safe_check_process(example)
+-- print(example_check)
+-- print(filter(function(a) return a.full_safe end, example_check):length())
+
+local day2_check = safe_check_process(day2)
+-- print(day2_check)
+print(filter(function(a)
+	return a.full_safe
+end, day2_check):length())
+
+print(1)
 
 -- local function count_safe_levels(table_of_tables)
 --     local output = {}
