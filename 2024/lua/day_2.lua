@@ -42,6 +42,10 @@ M.table_to_subtracted_pairs = function(items)
     return numbers
 end
 
+M.problem_fixer = function()
+    return 0
+end
+
 M.safe_check_process = function(data)
     local safe = {}
     for key, value in ipairs(data) do
@@ -52,6 +56,8 @@ M.safe_check_process = function(data)
         local same_sign_check = M.check_same_sign(numbers)
 
         local full_safe = range_check and same_sign_check
+
+        local safe_after_problem_fixer = M.problem_fixer(numbers)
 
         -- print(range_check)
         -- print(same_sign_check)
