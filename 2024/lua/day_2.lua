@@ -26,7 +26,7 @@ end
 M.safe_check_process = function(data)
 	local safe = {}
 	for key, value in ipairs(data) do
-		print(key, value)
+		-- print(key, value)
 		local numbers = {}
 		for i = 1, #value - 1 do
 			table.insert(numbers, value[i] - value[i + 1])
@@ -52,7 +52,7 @@ M.safe_check_process = function(data)
 			same_sign = same_sign_check,
 			full_safe = full_safe,
 		}
-		print(item)
+		-- print(item)
 		table.insert(safe, item)
 	end
 	return safe
