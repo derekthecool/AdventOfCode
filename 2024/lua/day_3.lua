@@ -9,11 +9,12 @@ M.extract_mul_raw = function(text)
 end
 
 M.remove_disabled_ranges = function(text)
-    -- This attempts to delete all text between don't and do
-    -- However, it will not work because it needs a half greedy solution
-    -- e.g. don't .... don't .... don't .... do will only delete the last don't to the do
-    -- the first few don'ts would not be deleted
-    return text:gsub("don't%(%).-do%(%)", "")
+    -- -- This attempts to delete all text between don't and do
+    -- -- However, it will not work because it needs a half greedy solution
+    -- -- e.g. don't .... don't .... don't .... do will only delete the last don't to the do
+    -- -- the first few don'ts would not be deleted
+    -- --
+    -- return text:gsub("don't%(%).-do%(%)", "")
 end
 
 M.raw_mul_to_table = function(raw_mul)

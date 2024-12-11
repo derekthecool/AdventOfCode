@@ -4,99 +4,116 @@ package.path = string.format("%s;%s/AdventOfCode/2024/lua/?.lua", package.path, 
 require("luafun_global")
 
 print(range(32)
-	:filter(function(a)
-		return a % 2 == 0
-	end)
-	:map(function(i)
-		return i * i
-	end)
-	:totable())
+    :filter(function(a)
+        return a % 2 == 0
+    end)
+    :map(function(i)
+        return i * i
+    end)
+    :totable())
 
 local days = require("inputs")
 print(days)
 
 print(all(function(x)
-	return x > 5
+    return x > 5
 end, range(6, 20)))
 
 local day2_code = require("day_2")
 
--- 502 was too high
--- 473 was too high
--- 296 was too low
+local day3 = days.from(2024, 3, false, true)
+
+-- local function better_day3_part2_replacement(text)
+--     local do_table = {}
+--     local dont_table = {}
 --
+--     -- local text = "don't don't don't don't don't don't do do do to don't don't don't don't"
+--
+--     -- Match do() or don't()
+--     local pattern = "don?'?t?%(%)"
+--
+--     local start_pos = 1 -- Start position for the search
+--
+--     for word in text:gmatch(pattern) do
+--         -- Find the position of the match starting from the current position
+--         local s, e = text:find(word, start_pos)
+--         if word == "do()" then
+--             table.insert(do_table, { s, e })
+--         elseif word == "don't" then
+--             table.insert(dont_table, { s, e })
+--         end
+--
+--         -- Ensure the start position is updated to after the previous match
+--         start_pos = e + 1
+--
+--         print("Matched word: '" .. word .. "', position: " .. s .. " to " .. e)
+--     end
+--
+--     return {
+--         do_table,
+--         dont_table,
+--     }
+-- end
 
-local day2 = days.from(2024, 2, true)
-print(day2)
+-- local function better_day3_part2_replacement(text)
+--     -- Regex pattern to match "don't" and "do()"
+--     local pattern = "do....." -- Regex for both "don't" and "do()"
+--     -- local pattern = "don%(%).*?%(%).*?%((%" .. "."%))" -- Regex for both “don’t(%)” Text's proper combination .
+--     local start_pos = 1
+--     local output = ""
+--
+--     -- Find all the positions of "don't" and "do()"
+--     for word in text:gmatch(pattern) do
+--         print(word)
+--         local s, e = text:find(word, start_pos)
+--         if s and e then
+--             print(s,e)
+--             
+--             if word:sub(1, 3):match("do%(%)") then
+--                 output = output .. string.format("[%d,%d]",s,e)
+--             elseif word == "don't" then
+--                 output = output .. string.format("{%d,%d}", s, e)
+--             end
+--             start_pos = e + 1
+--         end
+--     end
+--
+--     return output
+-- end
 
-local function safe_check_process(data)
-	local safe = {}
-	for key, value in ipairs(data) do
-		print(key, value)
-		local numbers = {}
-		for i = 1, #value - 1 do
-			table.insert(numbers, value[i] - value[i + 1])
-		end
-		local range_check = all(function(a)
-			return math.abs(a) >= 1 and math.abs(a) <= 3
-		end, numbers)
-		local same_sign_check = all(function(a)
-			return a < 0
-		end, numbers) or all(function(a)
-			return a > 0
-		end, numbers)
-		local full_safe = range_check and same_sign_check
+local function better_day3_part2_replacement(text)
+    local start_pos = 1
+    local result = ""
 
-		-- print(range_check)
-		-- print(same_sign_check)
-		-- print(full_safe)
+    while true do
+        -- Find the first "don't()" match from the current position
+        local dont_start, dont_end = text:find("don't%(%)", start_pos)
+        if not dont_start then
+            break -- Exit if no more "don't()" matches
+        end
 
-		local item = {
-			data = value,
-			difference = numbers,
-			range_okay = range_check,
-			same_sign = same_sign_check,
-			full_safe = full_safe,
-		}
-		print(item)
-		table.insert(safe, item)
-	end
-	return safe
+        -- Find the next "do()" match after the "don't()" match
+        local do_start, do_end = text:find("do%(%)", dont_end + 1)
+        if not do_start then
+            break -- Exit if no "do()" match is found after "don't()"
+        end
+
+        -- Extract and save the text between "don't()" and "do()"
+        result = text:sub(dont_end + 1, do_start - 1)
+
+        -- Update start_pos to continue searching after the "do()" match
+        start_pos = do_end + 1
+    end
+
+    return result:match("^%s*(.-)%s*$") -- Trim leading and trailing whitespace
 end
 
-local example = {
-	{ 7, 6, 4, 2, 1 },
-	{ 1, 2, 7, 8, 9 },
-	{ 9, 7, 6, 2, 1 },
-	{ 1, 3, 2, 4, 5 },
-	{ 8, 6, 4, 4, 1 },
-	{ 1, 3, 6, 7, 9 },
-}
+print(day3)
+print(#day3)
 
--- local day2_check = safe_check_process(day2)
--- -- print(day2_check)
--- print(filter(function(a)
--- 	return a.full_safe
--- end, day2_check):length())
+-- print(better_day3_part2_replacement(day3))
+-- print(#better_day3_part2_replacement(day3))
 
-print(1)
-
-local function drop_table(original)
-	local dropped_table = {}
-	for outer_key, outer_value in pairs(original) do
-		local table_with_an_index_missing = {}
-		for inner_key, inner_value in pairs(original) do
-			if inner_key ~= outer_key then
-				table.insert(table_with_an_index_missing, inner_value)
-			end
-		end
-		table.insert(dropped_table, table_with_an_index_missing)
-	end
-	return dropped_table
-end
-
-local nums = range(5):totable()
-print(nums)
-
-local dropped = drop_table(nums)
-print(dropped)
+local test_text = "do() hello don't() world don't() do() WORLD don't()"
+print(better_day3_part2_replacement(test_text))
+print(test_text == better_day3_part2_replacement(test_text))
