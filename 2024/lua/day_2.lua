@@ -79,7 +79,7 @@ M.is_safe = function(value)
         range_okay = range_check,
         same_sign = same_sign_check,
         full_safe = full_safe,
-        safe_after_fix = true,
+        safe_after_fix = false,
     }
 end
 
@@ -87,8 +87,8 @@ M.safe_check_process = function(data)
     local safe = {}
     for _, value in ipairs(data) do
         local item = M.is_safe(value)
-        if not item.full_safe then
-            item.safe_after_fix = M.problem_fixer(item.difference)
+        if item.full_safe ~= true then
+            item.safe_after_fix = M.problem_fixer(item.data)
         end
         table.insert(safe, item)
     end
@@ -103,7 +103,7 @@ end
 
 M.part_2 = function(data)
     return filter(function(a)
-        return (a.safe_after_fix or a.full_safe)
+        return a.safe_after_fix == true or a.full_safe == true
     end, M.safe_check_process(data)):length()
 end
 

@@ -150,6 +150,6 @@ describe("Solutions", function()
     end)
 
     it("Part 2", function()
-        assert.are.same(1234, DAY_2.part_2(DAY_2_INPUT))
+        assert.are.same(520, DAY_2.part_2(DAY_2_INPUT))
     end)
 end)
