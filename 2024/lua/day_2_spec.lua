@@ -51,11 +51,6 @@ describe("Day 2 examples", function()
         })
     end)
 
-    it("Reduce a row to a boolean", function()
-        local mapped_row = DAY_2.reduce_row_to_boolean(example[1])
-        assert.are.same(false, mapped_row)
-    end)
-
     it("Example input should have safe count of 2", function()
         local safe_count = DAY_2.part_1(example)
         assert.are.same(2, safe_count)
@@ -99,21 +94,6 @@ describe("Day 2 examples", function()
         local safe_count = DAY_2.part_2(example)
         assert.are.same(4, safe_count)
     end)
-
-    -- it("Single safe level check", function()
-    -- 	local safe = DAY_2.safe_level_check(lib.pairs(example[1])[1])
-    -- 	assert.True(safe)
-    -- end)
-
-    -- it("Single unsafe level check", function()
-    -- 	local unsafe = DAY_2.safe_level_check(lib.pairs(example[2])[2])
-    -- 	assert.False(unsafe)
-    -- end)
-
-    -- it("Test full safe function", function()
-    --     local safe = DAY_2.safe_check_process(DAY_2_INPUT)
-    --     assert.are.same(400, safe)
-    -- end)
 end)
 
 describe("Solutions", function()
