@@ -18,4 +18,14 @@ M.raw_mul_to_table = function(raw_mul)
     end, raw_mul):totable()
 end
 
+M.part_1 = function(input)
+    local raw = M.extract_mul_raw(input)
+    local parsed = M.raw_mul_to_table(raw)
+    local sum = 0
+    for _, value in ipairs(parsed) do
+        sum = sum + value[1][1] * value[1][2]
+    end
+    return sum
+end
+
 return M
